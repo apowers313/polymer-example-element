@@ -7,7 +7,6 @@
   "description": "Open element template",
   "main": "open-element.html",
   "keywords": [
-    "web-components",
     "Polymer"
   ],
   "license": "MIT",
