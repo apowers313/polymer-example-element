@@ -1,33 +1,30 @@
 <script>
 /**
- * An example Polymer element. Feel free to change it up.
- * Documents for Polymer can be found here:
- * * [Polymer Base API](http://polymer.github.io/polymer/)
- * * [Polymer Developer Guide](https://www.polymer-project.org/1.0/docs/devguide/feature-overview.html)
+ * An example Polymer element.
  *
- * Note that element names (e.g. - open-element) must contain a dash (-).
- *
- * By the way, this is documentation. For details check out
- * [the YUIDoc syntax](http://yui.github.io/yuidoc/syntax/)
- * and the results are in ./docs. Also note the new `@element` tag 
- * (which we should really be using here...)
- *
- * @class open-element
+ * @class example-element
  */
 </script>
 <link rel="import" href="../polymer/polymer.html">
 
-<dom-module id="open-element">
+<dom-module id="example-element">
     <style>
 
     </style>
     <template>
         Hello world!
-        <br> The open-element HTML goes here...
+        <br> The example-element HTML goes here...
+        <!-- data binding -->
+        <!-- Dom if -->
+        <!-- Dom repeat -->
+        <!-- filtering / sorting / observe -->
+        <!-- array selector -->
+        <!-- iron-ajax -->
+        <!-- content / distributed content -->
     </template>
     <script>
     Polymer({
-        is: 'open-element',
+        is: 'example-element',
 
         /**
          * Just a testProperty to show how properties work in Polymer.
@@ -47,17 +44,45 @@
                 // observer: "observerFunction(someProperty)",
                 // computed: "computedFunction(someProperty)",
                 // readOnly: true,
+                // value from function
             },
+            // Object
+            // Array
+            // Boolean
             // someProperty ...
         },
+        // ready() and other lifecycle events
 
         // observerFunction (val) {
         // do stuff
         // },
 
         // computedFunction (val) {
-        // do stuff
+        // return ...
         // }
+
+        // observers: [
+        //     "f(multiple,values)",
+        //     "f(some.path)",
+        //     "f(wildcard.path.*)",
+        //     "f(array)"
+        // ],
+
+        // listeners
+
+        // behaviors / extended behaviors
+
+        // Array methods
+
+        // notify: catch changed event
+
+        // this.$
+
+        // async()
+
+        // $$(selector)
+
+        // Events
     });
     </script>
 </dom-module>

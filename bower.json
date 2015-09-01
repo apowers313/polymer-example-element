@@ -1,11 +1,11 @@
 {
-  "name": "open-element",
+  "name": "example-element",
   "version": "0.0.2",
   "authors": [
     "Adam Powers <apowers@ato.ms>"
   ],
-  "description": "Open element template",
-  "main": "open-element.html",
+  "description": "Polymer example element",
+  "main": "example-element.html",
   "keywords": [
     "Polymer"
   ],

@@ -1,8 +1,8 @@
 {
-  "name": "open-element-template",
+  "name": "example-element-template",
   "version": "0.0.2",
-  "description": "Open element template",
-  "main": "open-element.html",
+  "description": "Polymer example element",
+  "main": "example-element.html",
   "directories": {
     "test": "test",
     "demo": "demo"
@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/apowers313/open-element-template.git"
+    "url": "git+https://github.com/apowers313/polymer-example-element-template.git"
   },
   "author": "apowers@ato.ms",
   "license": "MIT",
   "loglevel": "info",
   "bugs": {
-    "url": "https://github.com/apowers313/open-element-template/issues"
+    "url": "https://github.com/apowers313/polymer-example-element-template/issues"
   },
-  "homepage": "https://github.com/apowers313/open-element-template#readme",
+  "homepage": "https://github.com/apowers313/polymer-example-element-template#readme",
   "dependencies": {
     "bower": "^1.5.2"
   },
