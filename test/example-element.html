@@ -1,4 +1,30 @@
 <html>
+<script>
+/**
+ * This is a test suite for the example-element based on the [Web Component Tester](https://github.com/Polymer/web-component-tester). The tests below are
+ * for [Mocha](http://mochajs.org/) with the asserts from [Chai](http://chaijs.com/) and mocks, spys and stubs from [Sinon](sinonjs.org). It also uses a 
+ * [test fixture](https://github.com/Polymer/test-fixture) add-on that enables simple binding between various versions of the example-element and test cases.
+ * 
+ * This is a great place to look for example of how to use an element. If there is anything you can't figure out how to do on your own, you should be able
+ * to find it here. If you still can't figure something out, or if there missing examles that would be nice to have, drop an issue on the
+ * [GitHub Issue Tracker](https://github.com/apowers313/polymer-example-element/issues).
+ * 
+ * Note that if you try to use some of the examples below, you will see that the HTML takes the form:
+ * ``` javascript
+    <test-fixture id="simple">
+        <template>
+            <example-element></example-element>
+        </template>
+    </test-fixture>
+ * ```
+ * Most of that is just the testing framework. Your code would just look like:
+ * ``` javascript
+ <example-element></example-element>
+ * ```
+ *
+ * @module Test Framework and Example Usage
+ */
+</script>
 
 <head>
     <title>example-element tests</title>
@@ -14,70 +40,304 @@
 </head>
 
 <body>
-    <test-fixture id="testElement">
+    <test-fixture id="simple">
         <template>
             <example-element></example-element>
         </template>
     </test-fixture>
-    <test-fixture id="anotherTest">
+    <test-fixture id="assignedAttributes">
         <template>
-            <example-element test-property="I like beer"></example-element>
+            <example-element test-string="I like beer" test-number="69" names-array='["Thing1", "Thing2"]' vehicle-object='{"type": "motorcycle", "wheels": 2}' active happy-element>
+                <!-- Note: if you put comments in these test fixtures between `<template>` and `<example-element>`, your fixture will break... interesting... -->
+                <!-- Tests setting attribute values. Note that the "testString" Polymer property becomes the "test-string" HTML attribute, etc. -->
+                <!-- Arrays and Objects must be proper JSON, which means using double quotes in all the right places -->
+                <!-- Could also use JSON.stringify() to declare the names-array and vehicle-object attribute -->
+            </example-element>
+        </template>
+    </test-fixture>
+    <div id="container"></div>
+    <test-fixture id="containedFixture">
+        <template>
+            <example-element></example-element>
         </template>
     </test-fixture>
     <script>
-    suite('basic string tests', function() {
+    /**
+     * This suite covers the basic examples such as:
+     * * Setting the default values of properties
+     * * Setting properties via attribute in your element's tag
+     *
+     * @class Tests: Basic
+     */
+    suite("basic tests", function() {
+        /**
+         * This test checks to see if we get all the right default values, as defined on the properties object in our Polymer declaration
+         *
+         * @method Check default values
+         */
+        test("check default values", function() {
+            var exElem = fixture('simple');
 
+            // these are the default values set in the properties section of the example element
+            assert.strictEqual(exElem.testString, "this is the initial value", "initial test string should be 'this is the initial value'");
+            assert.strictEqual(exElem.testNumber, 42);
+            assert.deepEqual(exElem.namesArray, ["Alice", "Bob", "Carol", "Eve"]);
+            assert.deepEqual(exElem.sharedNamesArray, ["The", "Quick", "Brown", "Fox"]);
+            assert.deepEqual(exElem.vehicleObject, {
+                type: "car",
+                wheels: "4",
+                horsepower: 124,
+                brand: "Saturn",
+                model: "SC1",
+                doors: 3,
+                msrp: 13515
+            });
+            assert.strictEqual(exElem.active, true, "active should default to 'true'");
+            assert.strictEqual(exElem.happyElement, undefined, "happyElement should default to 'false' if not set on element");
 
-        test("check default value", function() {
-            var openElem = fixture('testElement');
-
-            assert.strictEqual(openElem.testProperty, "this is the initial value", "initial test string should be 'this is the initial value'");
-
-            openElem.testProperty = "I like pudding";
-            console.log ("You can see this in the console. Try `npm run testdebug` to keep the browser open:", openElem.testProperty);
-
-            assert.strictEqual(openElem.testProperty, "I like pudding", "test string should be 'I like pudding'");
+            // try changing a value
+            exElem.testString = "I like pudding";
+            // if you run `npm run testdebug` and open up the developer console, you will see this message below
+            console.log("You can see this in the console. Try `npm run testdebug` to keep the browser open:", exElem.testString);
+            assert.strictEqual(exElem.testString, "I like pudding", "test string should be 'I like pudding'");
         });
+        /**
+         * This test checks to see if we get all the right values set in the element above, as defined on the properties object in our Polymer declaration
+         *
+         * @method Check attributes values
+         */
+        test("check attribute values set in tag", function() {
+            var exElem = fixture('assignedAttributes');
 
-        test("check value set in tag", function() {
-            var openElem = fixture('anotherTest');
-
-            assert.strictEqual(openElem.testProperty, "I like beer", "test string should be 'I like beer'");
+            assert.strictEqual(exElem.testString, "I like beer", "test string should be 'I like beer'");
+            assert.strictEqual(exElem.testNumber, 69);
+            assert.isArray(exElem.namesArray);
+            assert.deepEqual(exElem.namesArray, ["Thing1", "Thing2"]);
+            assert.isObject(exElem.vehicleObject);
+            assert.deepEqual(exElem.vehicleObject, {
+                type: 'motorcycle',
+                wheels: 2
+            });
+            assert.strictEqual(exElem.active, true, "active should be set to 'true'");
+            assert.strictEqual(exElem.happyElement, true, "happyElement should be set to 'true'");
         });
+        /**
+         * Showing what happens when arrays and objects have default values that aren't set in functions
+         *
+         * @method Shared initial values
+         */
+        test("checking what happens if functions aren't used for default array / object values", function() {
+            var exElem1 = fixture('simple');
+            var exElem2 = fixture('assignedAttributes');
 
-        // Here's how to mock a server...
-        // var server;
-
-        // setup(function() {
-        //     server = sinon.fakeServer.create();
-        //     server.autoRespond = true;
-        //     server.autoRespondAfter = 0;
-        // });
-
-        // teardown(function() {
-        //     server.restore();
-        // });
-
-        // test("mock a URL and make sure it is handled right", function(done) {
-        //     var helperObj = {
-        //         foo: "bar",
-        //         a: 1,
-        //         b: ["c", "d"],
-        //         e: null,
-        //         f: true
-        //     };
-
-        //     server.respondWith("GET", "/local/path", [200, {
-        //         "Content-Type": "application/json"
-        //     }, JSON.stringify(helperObj)]);
-
-        //     var openElem = fixture('testElement');
-        //     Polymer.Base.async (function() {
-        //         assert.deepEqual (openElem.helperObj, helperObj, "element should have fetched its helperObj via a XHR request, which should be the exact same as the helperObj passed in");
-        //         done();
-        //     }, 1);
-        // });
+            // they were both initialized with the same default value
+            assert.deepEqual(exElem1.sharedNamesArray, ["The", "Quick", "Brown", "Fox"]);
+            assert.deepEqual(exElem2.sharedNamesArray, ["The", "Quick", "Brown", "Fox"]);
+            // XXX note: only assigning values to one array...
+            exElem1.sharedNamesArray[0] = "A";
+            exElem1.sharedNamesArray[1] = "Lazy";
+            exElem1.sharedNamesArray[2] = "Blue";
+            exElem1.sharedNamesArray[3] = "Dog";
+            // ...but the array wasn't declared in a function, so the values on both change
+            assert.deepEqual(exElem1.sharedNamesArray, ["A", "Lazy", "Blue", "Dog"]);
+            assert.deepEqual(exElem2.sharedNamesArray, ["A", "Lazy", "Blue", "Dog"]);
+        });
+        // show how to get elements the normal way, rather than using fixtures
+        test("getElementById");
+        test("getElementsByTagName");
+        test("this.$.example");
     });
+    /**
+     * This suite covers the lifecycle callbacks such as:
+     * * The `created()` event, when the element is created
+     * * The `ready()` event, when the element is ready
+     * * The `attached()` event, when the element is attached
+     *
+     * @class Tests: Lifecycle
+     */
+    suite("lifecycle tests", function() {
+        /**
+         * Catches all three lifecycle events (created, ready and attached) and makes sure they occured in the right order.
+         * In the Polymer() definition we have setup `created()`, `ready()`, and `attached()` to throw custom events so that we can
+         * see them happen here. Both `created` and `ready` have to emit their events directly on the `document` since they aren't
+         * attached yet, but `attached` uses `this.fire()` to send a custom event through Polymer.
+         *
+         * @method Full lifecycle
+         */
+        test("full lifecycle", function(done) {
+            // we can't create the example-element and catch all the events -- creation is fairly atomic at an HTML level
+            // we CAN set the events to bubble up, and then create the element and catch the events as they bubble up to the document
+
+            // create spies for our callbacks
+            var createdSpy = sinon.spy();
+            var readySpy = sinon.spy();
+            var attachedSpy = sinon.spy();
+
+            // catch events on our document that bubble up from our example-element
+            document.addEventListener("example-element-created", createdSpy);
+            document.addEventListener("example-element-ready", readySpy);
+            document.addEventListener("example-element-attached", attachedSpy);
+            console.log("attached listener");
+
+            // create our element, which is going to throw all of the events all at once
+            var exElem = fixture('simple');
+
+            assert.isTrue(createdSpy.calledOnce, "Created should be called");
+            assert.isTrue (readySpy.calledOnce, "Ready should be called");
+            assert.isTrue (attachedSpy.calledOnce, "Attached should be called");
+            assert.isTrue (createdSpy.calledBefore (readySpy), "Created called before ready");
+            assert.isTrue (readySpy.calledBefore (attachedSpy), "Ready called before attached");
+            done();
+        });
+        // there's a detached event that happens later, but it's hard to catch...
+        test("catch detached event");
+    });
+    /**
+     * Demonstrates various events, including:
+     * * Bubble and non-bubble events
+     * * Firing events from a different node
+     *
+     * @class Tests: Events
+     */
+    suite("Events", function() {
+        /**
+         * Shows how events bubble up
+         *
+         * @method Event bubble
+         */
+        test ("event bubble", function() {
+            var exElem = fixture('simple');
+            var elemSpy = sinon.spy();
+            var docSpy = sinon.spy();
+
+            // listen for the bubble on both the element and the document
+            exElem.addEventListener("smoke-bubble", elemSpy);
+            document.addEventListener("smoke-bubble", docSpy);
+
+            // fire our events
+            exElem.smoke();
+
+            assert.isTrue(elemSpy.calledOnce, "Should catch the event on the element");
+            assert.isTrue(docSpy.calledOnce, "Should catch the event on the document");
+            assert.isTrue (elemSpy.calledBefore (docSpy), "Should bubble up from the element to the document");
+        });
+        /**
+         * Setting the `bubbles` option to `false` when creating the event should prevent it from bubbling up
+         *
+         * @method Event no bubble
+         */
+        test ("event no bubble", function() {
+            var exElem = fixture('simple');
+            var elemSpy = sinon.spy();
+            var docSpy = sinon.spy();
+
+            // listen for the bubble on both the element and the document
+            exElem.addEventListener("smoke-no-bubble", elemSpy);
+            document.addEventListener("smoke-no-bubble", docSpy);
+
+            // fire our events
+            exElem.smoke();
+
+            assert.isTrue(elemSpy.calledOnce, "Should catch the event on the element");
+            assert.isFalse(docSpy.called, "Should catch the event on the document");
+        });
+
+        // test ("event cancelable", function() {
+        //     var exElem = fixture('simple');
+        //     var elemSpy = sinon.spy(cancelBubble);
+        //     var docSpy = sinon.spy();
+
+        //     function cancelBubble (e) {
+        //         e.stopPropagation();
+        //     }
+
+        //     // listen for the bubble on both the element and the document
+        //     exElem.addEventListener("smoke-cancelable", elemSpy);
+        //     document.addEventListener("smoke-cancelable", docSpy);
+
+        //     // fire our events
+        //     exElem.smoke();
+
+        //     assert.isTrue(elemSpy.calledOnce, "Should catch the event on the element");
+        //     assert.isFalse(docSpy.called, "Should catch the event on the document");
+        // });
+
+        // test ("event not cancelable", function() {
+        //     var exElem = fixture('simple');
+        //     var elemSpy = sinon.spy(cancelBubble);
+        //     var docSpy = sinon.spy();
+
+        //     function cancelBubble (e) {
+        //         e.stopPropagation();
+        //         assert.isFalse (e.cancelBubble, "We set 'cancelable' to false earlier, so it should be false here");
+        //     }
+
+        //     // listen for the bubble on both the element and the document
+        //     exElem.addEventListener("smoke-not-cancelable", elemSpy);
+        //     document.addEventListener("smoke-not-cancelable", docSpy);
+
+        //     // fire our events
+        //     exElem.smoke();
+
+        //     // both should be called, since the event is not cancelable
+        //     assert.isTrue(elemSpy.calledOnce, "Should catch the event on the element");
+        //     assert.isTrue(docSpy.calledOnce, "Should catch the event on the document");
+        // });
+
+        /**
+         * Firing an event from a node other than `this`, in this case `document`
+         *
+         * @@method Event node
+         */
+        test ("event node", function() {
+            var exElem = fixture('simple');
+            var elemSpy = sinon.spy();
+            var docSpy = sinon.spy();
+
+            // listen for the bubble on both the element and the document
+            exElem.addEventListener("smoke-node", elemSpy);
+            document.addEventListener("smoke-node", docSpy);
+
+            // fire our events
+            exElem.smoke();
+
+            assert.isFalse(elemSpy.called, "Should catch the event on the element");
+            assert.isTrue(docSpy.calledOnce, "Should catch the event on the document");
+        });
+    });
+
+    // Here's how to mock a server...
+    // var server;
+
+    // setup(function() {
+    //     server = sinon.fakeServer.create();
+    //     server.autoRespond = true;
+    //     server.autoRespondAfter = 0;
+    // });
+
+    // teardown(function() {
+    //     server.restore();
+    // });
+
+    // test("mock a URL and make sure it is handled right", function(done) {
+    //     var helperObj = {
+    //         foo: "bar",
+    //         a: 1,
+    //         b: ["c", "d"],
+    //         e: null,
+    //         f: true
+    //     };
+
+    //     server.respondWith("GET", "/local/path", [200, {
+    //         "Content-Type": "application/json"
+    //     }, JSON.stringify(helperObj)]);
+
+    //     var openElem = fixture('testElement');
+    //     Polymer.Base.async (function() {
+    //         assert.deepEqual (openElem.helperObj, helperObj, "element should have fetched its helperObj via a XHR request, which should be the exact same as the helperObj passed in");
+    //         done();
+    //     }, 1);
+    // });
     </script>
 </body>
 
