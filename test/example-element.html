@@ -142,6 +142,36 @@
             assert.deepEqual(exElem1.sharedNamesArray, ["A", "Lazy", "Blue", "Dog"]);
             assert.deepEqual(exElem2.sharedNamesArray, ["A", "Lazy", "Blue", "Dog"]);
         });
+        /**
+         * Should only change through the proper method, not direct assignment
+         * 
+         * @method Read only
+         */
+        test("read only", function() {
+            var exElem = fixture('simple');
+
+            assert.strictEqual(exElem.counter, 0, "Counter should start at zero");
+            exElem.counter = 42;
+            assert.strictEqual(exElem.counter, 0, "Counter should still be zero after direct assignment");
+            exElem.counterIncrement();
+            assert.strictEqual(exElem.counter, 1, "Counter should increment through counterIncrement method");
+        });
+        /**
+         * Computes the tax on `testNumber` by using a computed value. Every time `testNumber` changes, `calculateTax` should be called with `testNumber`
+         * as an argument and the resulting value should be assigned to `testNumberWithTax`.
+         *
+         * @method computed
+         */
+        test("computed", function() {
+            var exElem = fixture('simple');
+
+            var taxSpy = sinon.spy(exElem, "calculateTax");
+            assert.isFalse (taxSpy.called, "Computed value not called yet");
+            assert.strictEqual (exElem.testNumberWithTax, (42 * 1.085), "testNumberWithTax should default to 42 (default value for testNumber) * 1.085 (tax)");
+            exElem.testNumber = 100;
+            assert.isTrue (taxSpy.calledOnce, "Value should have been computed");
+            assert.strictEqual (exElem.testNumberWithTax, (100 * 1.085), "testNumberWithTax should default to 100 (new value for testNumber) * 1.085 (tax)");
+        });
         // show how to get elements the normal way, rather than using fixtures
         test("getElementById");
         test("getElementsByTagName");
@@ -183,10 +213,10 @@
             var exElem = fixture('simple');
 
             assert.isTrue(createdSpy.calledOnce, "Created should be called");
-            assert.isTrue (readySpy.calledOnce, "Ready should be called");
-            assert.isTrue (attachedSpy.calledOnce, "Attached should be called");
-            assert.isTrue (createdSpy.calledBefore (readySpy), "Created called before ready");
-            assert.isTrue (readySpy.calledBefore (attachedSpy), "Ready called before attached");
+            assert.isTrue(readySpy.calledOnce, "Ready should be called");
+            assert.isTrue(attachedSpy.calledOnce, "Attached should be called");
+            assert.isTrue(createdSpy.calledBefore(readySpy), "Created called before ready");
+            assert.isTrue(readySpy.calledBefore(attachedSpy), "Ready called before attached");
             done();
         });
         // there's a detached event that happens later, but it's hard to catch...
@@ -205,7 +235,7 @@
          *
          * @method Event bubble
          */
-        test ("event bubble", function() {
+        test("event bubble", function() {
             var exElem = fixture('simple');
             var elemSpy = sinon.spy();
             var docSpy = sinon.spy();
@@ -219,14 +249,14 @@
 
             assert.isTrue(elemSpy.calledOnce, "Should catch the event on the element");
             assert.isTrue(docSpy.calledOnce, "Should catch the event on the document");
-            assert.isTrue (elemSpy.calledBefore (docSpy), "Should bubble up from the element to the document");
+            assert.isTrue(elemSpy.calledBefore(docSpy), "Should bubble up from the element to the document");
         });
         /**
          * Setting the `bubbles` option to `false` when creating the event should prevent it from bubbling up
          *
          * @method Event no bubble
          */
-        test ("event no bubble", function() {
+        test("event no bubble", function() {
             var exElem = fixture('simple');
             var elemSpy = sinon.spy();
             var docSpy = sinon.spy();
@@ -289,7 +319,7 @@
          *
          * @@method Event node
          */
-        test ("event node", function() {
+        test("event node", function() {
             var exElem = fixture('simple');
             var elemSpy = sinon.spy();
             var docSpy = sinon.spy();
@@ -303,6 +333,64 @@
 
             assert.isFalse(elemSpy.called, "Should catch the event on the element");
             assert.isTrue(docSpy.calledOnce, "Should catch the event on the document");
+        });
+        /**
+         * Since testNumber is configured with `notify`, every time it changes it should send a `test-number-changed` event
+         *
+         * @method Notify
+         */
+        test("notify", function() {
+            var exElem = fixture('simple');
+
+            var elemSpy = sinon.spy();
+            assert.isFalse(elemSpy.called, "No events yet");
+            // XXX beware that testNumber emits a test-number-changed event
+            exElem.addEventListener("test-number-changed", elemSpy);
+
+            // change and catch the notification event
+            exElem.testNumber = 1234;
+            assert.isTrue(elemSpy.calledOnce, "Notified of testNumber changed event");
+            // receives a CustomEvent with the new value
+            assert.deepEqual(elemSpy.getCall(0).args[0].detail, {
+                value: 1234
+            });
+
+            // now test out the testString property, which doesn't have notify set on it
+            elemSpy.reset();
+            assert.isFalse(elemSpy.called, "No events yet");
+            exElem.addEventListener("test-string-changed", elemSpy);
+            exElem.testString = "foo";
+            assert.isFalse(elemSpy.called, "No notify, no events");
+
+        });
+        /**
+         * Spy on the observer function to make sure it gets called every time the value changes
+         *
+         * @method Observer
+         */
+        test("observer", function() {
+            var exElem = fixture('simple');
+
+            // install our spy on the testStringObserver method so that we can count the times it was called
+            var observerSpy = sinon.spy(exElem, "testStringObserver");
+
+            // check starting state
+            assert.strictEqual(exElem.testString, "this is the initial value");
+            assert.isFalse(observerSpy.called, "Observer shouldn't have been called yet");
+
+            // after the value changed, the observer gets called once with the old value and the new value
+            exElem.testString = "changed value";
+            assert.isTrue(observerSpy.calledOnce, "Observer should have been called after the value changed");
+            assert.isTrue(observerSpy.calledWith("changed value", "this is the initial value"));
+            exElem.testString = "changed value again";
+
+            // changed again, called again
+            assert.isTrue(observerSpy.calledTwice, "Observer should have been called after the value changed again");
+            assert.isTrue(observerSpy.calledWith("changed value again", "changed value"));
+
+            // we did an assignment, but it's smart enough not to call the observer because the value didn't change
+            exElem.testString = "changed value again";
+            assert.isTrue(observerSpy.calledTwice, "Despite assignment, observer shouldn't get called if the value doesn't change");
         });
     });
 

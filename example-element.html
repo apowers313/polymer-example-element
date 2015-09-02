@@ -78,12 +78,7 @@
             testString: {
                 type: String,
                 value: "this is the initial value",
-                // notify: true,
-                // reflectToATtribute: true,
-                // observer: "observerFunction(someProperty)",
-                // computed: "computedFunction(someProperty)",
-                // readOnly: true,
-                // value from function
+                observer: "testStringObserver"
             },
             /**
              * Just a simple little number
@@ -92,7 +87,8 @@
              */
             testNumber: {
                 type: Number,
-                value: 42
+                value: 42,
+                notify: true
             },
             /**
              * An array of strings that are people's names
@@ -151,9 +147,48 @@
              *
              * @property happyElement
              */
-            happyElement: Boolean
+            happyElement: Boolean,
+            /**
+             * Counter is readOnly, just so it doesn't accidentally get changed. But it can be incremented through the counterIncrement method
+             *
+             * @property counter
+             */
+            counter: {
+                type: Number,
+                value: 0,
+                readOnly: true
+            },
+            testNumberWithTax: {
+                type: Number,
+                computed: "calculateTax(testNumber)"
+            }
+            // refelectToAttribute
+            // computed
         },
-
+        /**
+         * An observer for the `testString` property that gets called every time it changes. It in turn fires an event with the new property value
+         *
+         * @method testStringObserver
+         */
+        testStringObserver: function(oldVal, newVal) {
+            console.log ("testStringObserver");
+        },
+        /**
+         * Increments the readOnly property `counter`
+         * 
+         * @method counterIncrement
+         */
+        counterIncrement: function() {
+            this._setCounter(this.counter + 1);
+        },
+        /**
+         * Computes the value of 8.5% sales tax for the number passed into it. Is used to compute the value of `testNumberWithTax` every time `testNumber` changes
+         * 
+         * @method calculateTax
+         */
+        calculateTax: function(x) {
+            return (x * 1.085);
+        },
         /**
          * This is a built-in Polymer lifecycle callback for when the element is created -- the first thing to happen to an element before the local DOM has been created.
          *
