@@ -317,7 +317,7 @@
         /**
          * Firing an event from a node other than `this`, in this case `document`
          *
-         * @@method Event node
+         * @method Event node
          */
         test("event node", function() {
             var exElem = fixture('simple');
@@ -392,6 +392,150 @@
             exElem.testString = "changed value again";
             assert.isTrue(observerSpy.calledTwice, "Despite assignment, observer shouldn't get called if the value doesn't change");
         });
+
+        // <test-element on-smoke-bubble=eventHandler >
+        test ("Event listener in HTML");
+        // this.$.nodeId.eventName
+        test ("Dynamic listener");
+        test ("Event retargeting");
+    });
+
+    /**
+     * Demonstrates manipulating the Local DOM (and Light DOM), such as
+     * * Finding local nodes by id, tag, and class
+     * * Finding dynamically created nodes
+     * * Adding elements to the local and light DOMs
+     *
+     * @class Tests: Local DOM
+     */
+    suite.only ("Local DOM", function () {
+        /**
+         * Use `this.$` to find a element by ID
+         *
+         * @method this.$
+         */
+        test ("this.$ finds by id", function () {
+            var exElem = fixture("simple");
+            var span = exElem.$.idSpan;
+
+            assert.isDefined (span);
+            assert.strictEqual (span.innerHTML, "This is a span with an ID", "$ should retrieve child tag by id");
+        });
+        /**
+         * Use `$$` selector to find by ID
+         *
+         * @method this.$$("#id")
+         */
+        test ("$$ finds by id", function () {
+            var exElem = fixture ("simple");
+            var span = exElem.$$("#idSpan");
+
+            assert.isDefined (span);
+            assert.strictEqual (span.innerHTML, "This is a span with an ID", "$$ should retrieve child tag by id");
+        });
+        /**
+         * Use `$$` selector to find by class
+         *
+         * @method this.$$(".class")
+         */
+        test ("$$ finds by class", function () {
+            var exElem = fixture ("simple");
+            var span = exElem.$$(".classSpan");
+
+            assert.isDefined (span);
+            assert.strictEqual (span.innerHTML, "This is a span with a class", "$$ should retrieve child tag by class");
+        });
+        /**
+         * Use `$$` selector to find by tag
+         *
+         * @method this.$$("tag")
+         */
+        test ("$$ finds by tag", function () {
+            var exElem = fixture ("simple");
+            var span = exElem.$$("div span");
+
+            assert.isDefined (span);
+            assert.strictEqual (span.innerHTML, "This is a span inside a div", "$$ should retrieve child tag by tag");
+        });
+        /**
+         * Show that `this.$` cannot find dynamic elements, but `$$` can
+         *
+         * @method Find Dynamic
+         */
+        test ("$$ finds dynamic nodes, $ does not", function () {
+            var exElem = fixture ("simple");
+
+            var newInput = document.createElement("textarea");
+            newInput.value = "This is a test of the emergency broadcast system";
+            newInput.id = "newInput";
+
+            // Add to local DOM (using .root)
+            Polymer.dom(exElem.root).appendChild (newInput);
+
+            assert.isUndefined (exElem.$.newInput, "$ cannot find dynamic content");
+            assert.isDefined (exElem.$$("textarea"), "$$ can find dynamic content");
+        });
+        test ("DOM distribution");
+        test ("getDistributedNodes");
+        test ("getDestinationInsertionPoints");
+        test ("distributeContent");
+        test ("DOM API");
+        /**
+         * Append local vs. append light using `this` vs `this.root`
+         *
+         * @method Append Local and Light
+         */
+        test ("Polymer.dom(this.root).appendChild() adds to the local DOM, not the light DOM", function () {
+            var exElem = fixture ("simple");
+
+            var newInput = document.createElement("textarea");
+            newInput.value = "This is a test of the emergency broadcast system";
+            newInput.id = "newInput";
+
+            // Add to light DOM (not using .root)
+            Polymer.dom(exElem).appendChild (newInput);
+            assert.isUndefined (exElem.$$("textarea"), "$$ can find dynamic content");
+
+            // Add to local DOM (using .root)
+            Polymer.dom(exElem.root).appendChild (newInput);
+
+            assert.isDefined (exElem.$$("textarea"), "$$ can find dynamic content");
+        });
+    });
+
+    suite ("Data Bindings", function () {
+
+    });
+
+    suite ("Behaviors", function () {
+        test ("Adding a property");
+        test ("Adding a default attribute");
+        test ("Adding a function");
+        test ("Adding a lifecycle callback");
+        test ("Adding an observer");
+        test ("Adding a listener");
+        test ("Overriding a function of the same name");
+        test ("Behavior precedence");
+        test ("Behavior chaining");
+    });
+
+    suite('Utilities', function() {
+        test ("$$ selector");
+        test ("Toggle Class");
+        test ("Toggle Attribute");
+        test ("Attribute Follows");
+        test ("Class Follows");
+        // fire covered in the 'smoke' tests
+        test ("async");
+        test ("cancelAsync");
+        test ("debounce");
+        test ("cancelDebouncer");
+        test ("flushDebouncer");
+        test ("isDebouncerActive");
+        test ("transform");
+        test ("translate3D");
+        test ("importHref");
+        test ("resolveUrl");
     });
 
     // Here's how to mock a server...
