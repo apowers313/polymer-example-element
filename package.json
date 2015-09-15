@@ -35,7 +35,9 @@
     "bower": "^1.5.2"
   },
   "devDependencies": {
+    "commitizen": "^1.0.4",
     "coveralls": "^2.11.4",
+    "cz-conventional-changelog": "^1.1.0",
     "polyserve": "^0.4.0",
     "strip-ansi-cli": "^1.0.0",
     "travis-encrypt": "^1.1.1",
